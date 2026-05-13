@@ -3,6 +3,20 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { templateService, shareService } from '../services/api';
 import html2canvas from 'html2canvas';
+import {
+  FacebookShareButton,
+  WhatsappShareButton,
+  TwitterShareButton,
+  LinkedinShareButton,
+  EmailShareButton,
+  TelegramShareButton,
+  FacebookIcon,
+  WhatsappIcon,
+  TwitterIcon,
+  LinkedinIcon,
+  EmailIcon,
+  TelegramIcon
+} from 'react-share';
 import '../styles/Editor.css';
 
 const EditorPage = () => {
@@ -12,6 +26,9 @@ const EditorPage = () => {
   const [template, setTemplate] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareUrl, setShareUrl] = useState('');
+  const [shareLoading, setShareLoading] = useState(false);
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -33,6 +50,7 @@ const EditorPage = () => {
 
   const handleShareCard = async () => {
     try {
+      setShareLoading(true);
       const canvas = await html2canvas(canvasRef.current);
       const imageData = canvas.toDataURL('image/png');
 
@@ -43,13 +61,19 @@ const EditorPage = () => {
         imageData
       );
 
-      // Copy to clipboard and show notification
-      navigator.clipboard.writeText(shareData.shareLink);
-      alert('Share link copied to clipboard!');
+      setShareUrl(shareData.shareLink || window.location.href);
+      setShowShareModal(true);
+      setShareLoading(false);
     } catch (err) {
-      alert('Failed to generate share link');
       console.error(err);
+      alert('Failed to generate share link');
+      setShareLoading(false);
     }
+  };
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(shareUrl);
+    alert('Share link copied to clipboard!');
   };
 
   const handleDownloadCard = async () => {
@@ -111,14 +135,97 @@ const EditorPage = () => {
         </div>
 
         <div className="editor-actions">
-          <button className="btn-primary" onClick={handleShareCard}>
-            Share Card
+          <button className="btn-primary" onClick={handleShareCard} disabled={shareLoading}>
+            {shareLoading ? 'Generating...' : '🔗 Share Card'}
           </button>
           <button className="btn-secondary" onClick={handleDownloadCard}>
-            Download
+            ⬇️ Download
           </button>
         </div>
       </div>
+
+      {/* Share Modal */}
+      {showShareModal && (
+        <div className="share-modal-overlay" onClick={() => setShowShareModal(false)}>
+          <div className="share-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="share-modal-header">
+              <h3>Share Your Greeting Card</h3>
+              <button className="close-btn" onClick={() => setShowShareModal(false)}>✕</button>
+            </div>
+
+            <div className="share-modal-content">
+              {/* Share Link Section */}
+              <div className="share-link-section">
+                <label>Direct Link:</label>
+                <div className="share-input-group">
+                  <input 
+                    type="text" 
+                    value={shareUrl} 
+                    readOnly 
+                    onClick={(e) => e.target.select()}
+                  />
+                  <button className="copy-btn" onClick={handleCopyLink}>Copy</button>
+                </div>
+              </div>
+
+              {/* Social Sharing Options */}
+              <div className="social-share-section">
+                <p className="share-label">Share on Social Media:</p>
+                <div className="social-buttons">
+                  <FacebookShareButton
+                    url={shareUrl}
+                    quote={`Check out my beautiful greeting card - ${user?.name || 'My'} created with ClassPlus!`}
+                    className="share-button facebook"
+                  >
+                    <FacebookIcon size={40} round />
+                  </FacebookShareButton>
+
+                  <WhatsappShareButton
+                    url={shareUrl}
+                    title={`Check out my beautiful greeting card! Created with ClassPlus 🎉`}
+                    className="share-button whatsapp"
+                  >
+                    <WhatsappIcon size={40} round />
+                  </WhatsappShareButton>
+
+                  <TwitterShareButton
+                    url={shareUrl}
+                    title={`Just created an amazing greeting card with ClassPlus! Check it out 🎨`}
+                    className="share-button twitter"
+                  >
+                    <TwitterIcon size={40} round />
+                  </TwitterShareButton>
+
+                  <LinkedinShareButton
+                    url={shareUrl}
+                    title="Check out my greeting card"
+                    className="share-button linkedin"
+                  >
+                    <LinkedinIcon size={40} round />
+                  </LinkedinShareButton>
+
+                  <TelegramShareButton
+                    url={shareUrl}
+                    title={`Check out my beautiful greeting card!`}
+                    className="share-button telegram"
+                  >
+                    <TelegramIcon size={40} round />
+                  </TelegramShareButton>
+
+                  <EmailShareButton
+                    url={shareUrl}
+                    subject="Check out my greeting card!"
+                    body="I created a beautiful greeting card with ClassPlus. Check it out:"
+                    className="share-button email"
+                  >
+                    <EmailIcon size={40} round />
+                  </EmailShareButton>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

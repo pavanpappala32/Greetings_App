@@ -49,6 +49,18 @@ CORS_ORIGIN=http://localhost:3000
 REACT_APP_API_URL=http://localhost:5000/api
 ```
 
+## 📚 Technical Documentation
+
+For detailed technical information, including:
+- **Problem-Solving Approach**: Image overlay logic implementation
+- **Architecture Overview**: System design and data flow
+- **Tech Stack**: Complete list of frameworks and libraries
+- **Challenges & Solutions**: Technical hurdles and how they were overcome
+- **Scalability Considerations**: Plans for handling 100K+ users
+- **Future Improvements**: Advanced features and enhancements
+
+See [TECHNICAL_DOCUMENTATION.md](TECHNICAL_DOCUMENTATION.md)
+
 ## Database Setup
 
 ### Option 1: Local MongoDB
